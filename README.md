@@ -105,11 +105,22 @@ This runs `install -> generate -> lint -> fmt:check -> build -> typecheck -> tes
 the repository CI (`.github/workflows/ci.yaml`).
 
 Alternatively, build the provided container image, which installs the pinned toolchain
-(Node 24, bun, pnpm) and runs the same gate as a build step:
+(Node 24.14.1, bun 1.3.8, pnpm 10.34.3) and runs the same gate as a build step:
 
 ```bash
 docker build -t v0-sdk:build .
 ```
+
+On hosts whose kernel lacks netfilter modules (e.g. restricted sandboxes), build with host
+networking so the image can reach package mirrors:
+
+```bash
+podman build --network=host -t v0-sdk:build .
+```
+
+Validated 2026-08-05: the image builds clean and the in-image gate passes end to end
+(`build gate passed`; 40 tests green). The image's `git` is dnf's `git-core` (not the
+sandbox's vendored 2.49.0); the gate itself never invokes git.
 
 ## License
 
