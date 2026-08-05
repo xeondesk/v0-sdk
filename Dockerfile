@@ -16,7 +16,7 @@ ENV PATH="${NODE_BASE}/bin:/usr/local/bin:/usr/bin:/bin"
 
 # Base OS packages
 RUN dnf install -y \
-        tar gzip unzip xz curl wget ca-certificates \
+        tar gzip unzip xz curl-minimal wget ca-certificates \
         make gcc gcc-c++ python3 git-core \
         procps-ng findutils && \
     dnf clean all
