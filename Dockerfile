@@ -44,6 +44,7 @@ WORKDIR /repo
 
 # Copy manifests first for layer caching, then the sources
 COPY package.json bun.lock ./
+COPY .oxlintrc.json .oxfmtrc.json .ignore .gitignore ./
 COPY packages ./packages
 COPY examples ./examples
 COPY scripts ./scripts
