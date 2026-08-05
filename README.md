@@ -101,8 +101,8 @@ runtime) in one command:
 ./scripts/reproduce.sh
 ```
 
-This runs `install -> generate -> lint -> fmt:check -> build -> typecheck -> test` and mirrors
-the repository CI (`.github/workflows/ci.yaml`).
+This runs `install -> lockstep versions -> generate -> lint -> fmt:check -> build -> typecheck -> test`
+and mirrors the repository CI (`.github/workflows/ci.yaml`).
 
 Alternatively, build the provided container image, which installs the pinned toolchain
 (Node 24.14.1, bun 1.3.8, pnpm 10.34.3) and runs the same gate as a build step:

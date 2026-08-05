@@ -50,7 +50,7 @@ COPY examples ./examples
 COPY scripts ./scripts
 COPY nix ./nix
 
-# Reproducible build gate (install -> generate -> lint -> fmt -> build -> typecheck -> test)
+# Reproducible build gate (install -> lockstep versions -> generate -> lint -> fmt -> build -> typecheck -> test)
 RUN bash scripts/reproduce.sh
 
 CMD ["bash", "-lc", "bun run test"]
