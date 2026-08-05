@@ -1,0 +1,7 @@
+{
+  "framework": "nextjs",
+  "rootDirectory": "examples/react-chat",
+  "installCommand": "bun install",
+  "buildCommand": "bun --filter v0 build && bun --filter @v0-sdk/react build && bun run build",
+  "outputDirectory": ".next"
+}
