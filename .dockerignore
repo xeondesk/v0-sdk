@@ -1,0 +1,12 @@
+.git
+node_modules
+**/node_modules
+**/dist
+**/*.tsbuildinfo
+.next
+examples/react-chat/node_modules
+examples/basic/node_modules
+examples/v0-clone/node_modules
+examples/v0-clone/apps/web/.next
+examples/v0-clone/apps/preview-proxy/.next
+.env*
