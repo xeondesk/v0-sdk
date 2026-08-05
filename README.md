@@ -102,13 +102,16 @@ runtime) in one command:
 ```
 
 This runs `install -> lockstep versions -> generate -> lint -> fmt:check -> build -> typecheck -> test`
-and mirrors the repository CI (`.github/workflows/ci.yaml`).
+and mirrors the repository CI (`.github/workflows/ci.yaml`). Prerequisites: `bun` and `node` on
+`PATH` (the lockstep version check reads the package manifests with `node`).
 
 Alternatively, build the provided container image, which installs the pinned toolchain
 (Node 24.14.1, bun 1.3.8, pnpm 10.34.3) and runs the same gate as a build step:
 
 ```bash
 docker build -t v0-sdk:build .
+docker run --rm -it v0-sdk:build          # runs the test suite
+docker run --rm -it v0-sdk:build bash -lc './scripts/reproduce.sh'   # re-runs the full gate
 ```
 
 On hosts whose kernel lacks netfilter modules (e.g. restricted sandboxes), build with host
@@ -118,9 +121,19 @@ networking so the image can reach package mirrors:
 podman build --network=host -t v0-sdk:build .
 ```
 
+The Node.js and bun downloads in the Dockerfile are checksum-verified (pinned SHA-256 from the
+official release lists) before extraction.
+
 Validated 2026-08-05: the image builds clean and the in-image gate passes end to end
 (`build gate passed`; 40 tests green). The image's `git` is dnf's `git-core` (not the
 sandbox's vendored 2.49.0); the gate itself never invokes git.
+
+## Deployment
+
+`vercel.json` deploys the [`examples/react-chat`](./examples/react-chat) Next.js app: it builds the
+`v0` and `@v0-sdk/react` workspace packages with `bun --filter` first, then runs `next build`
+(output `.next`). The `bun` filter syntax runs natively on Vercel's build image (validated
+2026-08-05; preview deployment Ready).
 
 ## License
 
