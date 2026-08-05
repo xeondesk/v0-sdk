@@ -4,6 +4,10 @@ node_modules
 **/dist
 **/*.tsbuildinfo
 .next
+**/.next
+.turbo
+**/.turbo
+**/*.log
 examples/react-chat/node_modules
 examples/basic/node_modules
 examples/v0-clone/node_modules
