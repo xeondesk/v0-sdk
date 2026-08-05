@@ -92,6 +92,25 @@ bun run fmt:check
 
 The generated SDK is built from [`packages/v0-sdk/openapi.json`](./packages/v0-sdk/openapi.json) with [`@hey-api/openapi-ts`](https://heyapi.dev/openapi-ts/get-started).
 
+## Reproducible build
+
+The full build gate can be reproduced on Amazon Linux 2023 (matching the Vercel v0 sandbox
+runtime) in one command:
+
+```bash
+./scripts/reproduce.sh
+```
+
+This runs `install -> generate -> lint -> fmt:check -> build -> typecheck -> test` and mirrors
+the repository CI (`.github/workflows/ci.yaml`).
+
+Alternatively, build the provided container image, which installs the pinned toolchain
+(Node 24, bun, pnpm) and runs the same gate as a build step:
+
+```bash
+docker build -t v0-sdk:build .
+```
+
 ## License
 
 Apache 2.0
