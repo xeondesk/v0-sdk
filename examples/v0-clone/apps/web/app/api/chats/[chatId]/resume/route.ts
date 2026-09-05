@@ -1,12 +1,15 @@
-import { runV0Stream } from '@/lib/v0-stream'
+import { authorizeProxyRequest } from '@/lib/proxy'
 import { getChat, messages } from '@/lib/chat-store'
 
 const encoder = new TextEncoder()
 
 export async function POST(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ chatId: string }> },
 ) {
+  const denied = authorizeProxyRequest(request)
+  if (denied) return denied
+
   const { chatId } = await params
   const chat = getChat(chatId)
 

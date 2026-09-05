@@ -1,5 +1,5 @@
 import { authorizeProxyRequest } from '@/lib/proxy'
-import { getChat, messages, resetFiles, truncateMessagesTo } from '@/lib/chat-store'
+import { getChat, resetFiles, truncateMessagesTo } from '@/lib/chat-store'
 
 export async function POST(
   request: Request,

@@ -170,7 +170,7 @@ export function getFiles(chatId: string): Files['files'] {
 export function patchFiles(chatId: string, files: Array<{ path: string; content: string }>) {
   const result = new Map((chatFiles.get(chatId) ?? []).map((file) => [file.path, file]))
   for (const file of files) {
-    result.set(file.path, { path: file.path, content: file.content })
+    result.set(file.path, { path: file.path, content: file.content, encoding: 'utf8' })
   }
   const next = [...result.values()]
   chatFiles.set(chatId, next)

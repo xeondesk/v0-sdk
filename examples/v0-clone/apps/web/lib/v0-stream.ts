@@ -130,8 +130,8 @@ export function runV0Stream({
           emitText()
         }
 
-        const modelFinishReason = await result.finishReason.catch(() => null)
-        const usage = await result.usage.catch(() => undefined)
+        const modelFinishReason = await Promise.resolve(result.finishReason).catch(() => null)
+        const usage = await Promise.resolve(result.usage).catch(() => undefined)
         if (modelFinishReason === 'length' || modelFinishReason === 'error') {
           finishReason = modelFinishReason
         }

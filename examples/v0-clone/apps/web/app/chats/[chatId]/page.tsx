@@ -1,30 +1,23 @@
+import { notFound } from 'next/navigation'
 import type { ChatFilesResult } from '@/components/chat/code-editor'
 import { ChatWorkspace } from '@/components/chat/chat-workspace'
-import { v0 } from '@/lib/v0-client'
+import { getChat, getFiles, messages } from '@/lib/chat-store'
 
 export default async function ChatPage({ params }: { params: Promise<{ chatId: string }> }) {
   const { chatId } = await params
-  const filesPromise: Promise<ChatFilesResult> = v0.chats
-    .getFiles({ chatId })
-    .then((response) => {
-      if (response.error) return { error: response.error.message }
-      return { files: response.data.files }
-    })
-    .catch(() => ({ error: 'Failed to load files.' }))
-  const [chatResponse, messagesResponse] = await Promise.all([
-    v0.chats.get({ chatId }),
-    v0.messages.list({ chatId, limit: 100 }),
-  ])
+  const chat = getChat(chatId)
 
-  if (chatResponse.error) throw new Error(chatResponse.error.message)
-  if (messagesResponse.error) throw new Error(messagesResponse.error.message)
+  if (!chat) notFound()
+
+  const filesPromise: Promise<ChatFilesResult> = Promise.resolve({ files: getFiles(chatId) })
+  const chatMessages = [...messages(chatId)].reverse()
 
   return (
     <ChatWorkspace
-      chat={chatResponse.data}
+      chat={chat}
       filesPromise={filesPromise}
-      key={chatResponse.data.id}
-      messages={messagesResponse.data.messages}
+      key={chat.id}
+      messages={chatMessages}
     />
   )
 }

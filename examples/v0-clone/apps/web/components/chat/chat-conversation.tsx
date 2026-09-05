@@ -152,7 +152,10 @@ export function ChatConversation({
       const response = await resolveTaskMutation.trigger({
         task,
         modelConfiguration: {
-          modelId: settings.model,
+          // resolve is only ever reached via v0 task parts, which plain-text
+          // OpenRouter replies never produce; the cast keeps the v0 SDK's
+          // narrow model union satisfied.
+          modelId: settings.model as 'v0-mini' | 'v0-pro' | 'v0-max' | 'v0-max-fast',
           imageGenerations: false,
         },
       })

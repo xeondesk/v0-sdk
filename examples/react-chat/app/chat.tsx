@@ -1,17 +1,29 @@
 'use client'
 
 import { useChat } from '@ai-sdk/react'
+import { useState, type FormEvent } from 'react'
 
 const SYSTEM_PROMPT =
   'You are an expert engineer. Build and improve web applications with clean, ' +
   'production-ready code. Ask clarifying questions when a request is ambiguous.'
 
 export function ChatPage() {
-  const { error, handleInputChange, handleSubmit, input, messages, status, stop } = useChat({
-    api: '/api/chat',
-    system: SYSTEM_PROMPT,
-  })
+  const [input, setInput] = useState('')
+  const { error, messages, sendMessage, status, stop } = useChat()
   const generating = status === 'submitted' || status === 'streaming'
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const text = input.trim()
+    if (!text || generating) return
+    setInput('')
+    void sendMessage(
+      { text },
+      {
+        body: { system: SYSTEM_PROMPT },
+      },
+    )
+  }
 
   return (
     <main className="shell">
@@ -52,7 +64,7 @@ export function ChatPage() {
       <form onSubmit={handleSubmit}>
         <textarea
           aria-label="Message"
-          onChange={handleInputChange}
+          onChange={(event) => setInput(event.currentTarget.value)}
           placeholder="Build a project dashboard…"
           rows={3}
           value={input}

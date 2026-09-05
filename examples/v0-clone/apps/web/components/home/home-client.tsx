@@ -3,7 +3,7 @@
 import { useChat } from '@ai-sdk/react'
 import { V0Transport, type V0UIMessage } from '@v0-sdk/react'
 import { useRouter } from 'next/navigation'
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { PromptBox } from '@/components/prompt-box'
 import { ConversationView } from '@/components/chat/conversation-view'
 import { SidebarToggleButton } from '@/components/layout/app-shell'
@@ -13,6 +13,7 @@ export function HomeClient() {
   const router = useRouter()
   const { settings, updateSettings } = useSettings()
   const [actionError, setActionError] = useState<string | null>(null)
+  const createdChatId = useRef<string | null>(null)
   const transport = useMemo(
     () =>
       new V0Transport({
@@ -21,13 +22,11 @@ export function HomeClient() {
           send: (id) => `/api/chats/${encodeURIComponent(id)}/messages`,
           resume: (id) => `/api/chats/${encodeURIComponent(id)}/resume`,
         },
-        onChatCreated: (chatId, { stop }) => {
-          stop()
-          router.push(`/chats/${chatId}`)
-          router.refresh()
+        onChatCreated: (chatId) => {
+          createdChatId.current = chatId
         },
       }),
-    [router],
+    [],
   )
   const {
     clearError,
@@ -37,6 +36,14 @@ export function HomeClient() {
     status,
   } = useChat<V0UIMessage>({
     transport,
+    onFinish: () => {
+      const chatId = createdChatId.current
+      if (!chatId) return
+      // Navigate once the reply is persisted, so the chat page renders the
+      // complete conversation.
+      router.push(`/chats/${chatId}`)
+      router.refresh()
+    },
   })
   const chatIsCreating = status === 'submitted' || status === 'streaming'
   const error = actionError ?? chatError?.message
