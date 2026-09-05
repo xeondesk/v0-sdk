@@ -79,6 +79,7 @@ jobs:
           reviewers: |
             alex-grover
             rickeyswuave
+            xeondesk
           body: |
             Fetches the latest OpenAPI document from the production API and regenerates the TypeScript SDK, AI tools, and React hooks.
 
