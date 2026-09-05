@@ -49,6 +49,9 @@ export type V0ToolName =
   | 'messagesStop'
   | 'settingsGetPreviewHosts'
   | 'settingsSetPreviewHosts'
+  | 'usageGetActivity'
+  | 'usageGetSummary'
+  | 'usageListEvents'
   | 'webhooksCreate'
   | 'webhooksDelete'
   | 'webhooksGet'
@@ -102,6 +105,7 @@ export type V0ToolsByCategory = {
     | 'messagesStop'
   >
   settings: Pick<V0ToolsFlat, 'settingsGetPreviewHosts' | 'settingsSetPreviewHosts'>
+  usage: Pick<V0ToolsFlat, 'usageGetActivity' | 'usageGetSummary' | 'usageListEvents'>
   webhooks: Pick<
     V0ToolsFlat,
     'webhooksCreate' | 'webhooksDelete' | 'webhooksGet' | 'webhooksList' | 'webhooksUpdate'
@@ -131,11 +135,19 @@ const chatsCreateInputSchema = z.object({
     .optional(),
   attachments: z
     .array(
-      z.object({
-        url: z.string().describe('URL of the attachment.'),
-      }),
+      z.union([
+        z.object({
+          url: z.string().describe('URL or data URI containing the attachment.'),
+        }),
+        z.object({
+          name: z.string().describe('Display name for the inline text attachment.').optional(),
+          content: z.string().describe('UTF-8 text content of the attachment.'),
+        }),
+      ]),
     )
-    .describe('Files or assets to include with the message.')
+    .describe(
+      'Files or assets to include with the message. Provide either a URL or data URI, or inline UTF-8 text content.',
+    )
     .optional(),
   mcpServerIds: z
     .array(z.string())
@@ -197,11 +209,19 @@ const chatsCreateAsyncInputSchema = z.object({
     .optional(),
   attachments: z
     .array(
-      z.object({
-        url: z.string().describe('URL of the attachment.'),
-      }),
+      z.union([
+        z.object({
+          url: z.string().describe('URL or data URI containing the attachment.'),
+        }),
+        z.object({
+          name: z.string().describe('Display name for the inline text attachment.').optional(),
+          content: z.string().describe('UTF-8 text content of the attachment.'),
+        }),
+      ]),
     )
-    .describe('Files or assets to include with the message.')
+    .describe(
+      'Files or assets to include with the message. Provide either a URL or data URI, or inline UTF-8 text content.',
+    )
     .optional(),
   mcpServerIds: z
     .array(z.string())
@@ -321,11 +341,19 @@ const chatsCreateStreamInputSchema = z.object({
     .optional(),
   attachments: z
     .array(
-      z.object({
-        url: z.string().describe('URL of the attachment.'),
-      }),
+      z.union([
+        z.object({
+          url: z.string().describe('URL or data URI containing the attachment.'),
+        }),
+        z.object({
+          name: z.string().describe('Display name for the inline text attachment.').optional(),
+          content: z.string().describe('UTF-8 text content of the attachment.'),
+        }),
+      ]),
     )
-    .describe('Files or assets to include with the message.')
+    .describe(
+      'Files or assets to include with the message. Provide either a URL or data URI, or inline UTF-8 text content.',
+    )
     .optional(),
   mcpServerIds: z
     .array(z.string())
@@ -677,6 +705,12 @@ const messagesResolveInputSchema = z.object({
                 .describe(
                   'The tool call input arguments. Pass the exact input from the stopped task.',
                 ),
+              toolDisplayName: z
+                .union([z.string(), z.null()])
+                .describe(
+                  "The tool's original human-readable name from the stopped task. Display-only; pass back unchanged. Capped at 100 characters, matching the cap applied when the name is ingested from the server.",
+                )
+                .optional(),
               taskNameActive: z
                 .union([z.string(), z.null()])
                 .describe('Label shown while the tool is running (e.g. "Running migration").')
@@ -804,6 +838,12 @@ const messagesResolveAsyncInputSchema = z.object({
                 .describe(
                   'The tool call input arguments. Pass the exact input from the stopped task.',
                 ),
+              toolDisplayName: z
+                .union([z.string(), z.null()])
+                .describe(
+                  "The tool's original human-readable name from the stopped task. Display-only; pass back unchanged. Capped at 100 characters, matching the cap applied when the name is ingested from the server.",
+                )
+                .optional(),
               taskNameActive: z
                 .union([z.string(), z.null()])
                 .describe('Label shown while the tool is running (e.g. "Running migration").')
@@ -931,6 +971,12 @@ const messagesResolveStreamInputSchema = z.object({
                 .describe(
                   'The tool call input arguments. Pass the exact input from the stopped task.',
                 ),
+              toolDisplayName: z
+                .union([z.string(), z.null()])
+                .describe(
+                  "The tool's original human-readable name from the stopped task. Display-only; pass back unchanged. Capped at 100 characters, matching the cap applied when the name is ingested from the server.",
+                )
+                .optional(),
               taskNameActive: z
                 .union([z.string(), z.null()])
                 .describe('Label shown while the tool is running (e.g. "Running migration").')
@@ -1001,11 +1047,19 @@ const messagesSendInputSchema = z.object({
     .optional(),
   attachments: z
     .array(
-      z.object({
-        url: z.string().describe('URL of the attachment.'),
-      }),
+      z.union([
+        z.object({
+          url: z.string().describe('URL or data URI containing the attachment.'),
+        }),
+        z.object({
+          name: z.string().describe('Display name for the inline text attachment.').optional(),
+          content: z.string().describe('UTF-8 text content of the attachment.'),
+        }),
+      ]),
     )
-    .describe('Files or assets to include with the message.')
+    .describe(
+      'Files or assets to include with the message. Provide either a URL or data URI, or inline UTF-8 text content.',
+    )
     .optional(),
   skills: z
     .array(
@@ -1059,11 +1113,19 @@ const messagesSendAsyncInputSchema = z.object({
     .optional(),
   attachments: z
     .array(
-      z.object({
-        url: z.string().describe('URL of the attachment.'),
-      }),
+      z.union([
+        z.object({
+          url: z.string().describe('URL or data URI containing the attachment.'),
+        }),
+        z.object({
+          name: z.string().describe('Display name for the inline text attachment.').optional(),
+          content: z.string().describe('UTF-8 text content of the attachment.'),
+        }),
+      ]),
     )
-    .describe('Files or assets to include with the message.')
+    .describe(
+      'Files or assets to include with the message. Provide either a URL or data URI, or inline UTF-8 text content.',
+    )
     .optional(),
   skills: z
     .array(
@@ -1117,11 +1179,19 @@ const messagesSendStreamInputSchema = z.object({
     .optional(),
   attachments: z
     .array(
-      z.object({
-        url: z.string().describe('URL of the attachment.'),
-      }),
+      z.union([
+        z.object({
+          url: z.string().describe('URL or data URI containing the attachment.'),
+        }),
+        z.object({
+          name: z.string().describe('Display name for the inline text attachment.').optional(),
+          content: z.string().describe('UTF-8 text content of the attachment.'),
+        }),
+      ]),
     )
-    .describe('Files or assets to include with the message.')
+    .describe(
+      'Files or assets to include with the message. Provide either a URL or data URI, or inline UTF-8 text content.',
+    )
     .optional(),
   skills: z
     .array(
@@ -1162,6 +1232,28 @@ const settingsSetPreviewHostsInputSchema = z.object({
     .describe(
       'The complete list of exact or wildcard hostname patterns trusted to embed previews. Provide hostnames only, without a scheme, port, path, userinfo, query string, or fragment. Use *.example.com for exactly one subdomain label and **.example.com for one or more. Wildcards do not include example.com itself; add the apex as a separate entry when needed.',
     ),
+})
+
+const usageGetActivityInputSchema = z.object({
+  start: z.string().datetime().optional(),
+  end: z.string().datetime().optional(),
+  userId: z.string().optional(),
+})
+
+const usageGetSummaryInputSchema = z.object({
+  start: z.string().datetime().optional(),
+  end: z.string().datetime().optional(),
+  userId: z.string().optional(),
+})
+
+const usageListEventsInputSchema = z.object({
+  start: z.string().datetime().optional(),
+  end: z.string().datetime().optional(),
+  userId: z.string().optional(),
+  chatId: z.string().optional(),
+  messageId: z.string().optional(),
+  limit: z.number().int().optional(),
+  cursor: z.string().optional(),
 })
 
 const webhooksCreateInputSchema = z.object({
@@ -1478,7 +1570,7 @@ export function v0Tools(config: V0ToolsConfig = {}): V0ToolsFlat {
     }),
     mcpServersCreate: tool({
       description:
-        'Create MCP Server: Creates a new MCP server configuration. Limited to 10 servers per user.',
+        'Create MCP Server: Creates a new MCP server configuration. Limited to 100 servers per user.',
       inputSchema: mcpServersCreateInputSchema,
       execute: async (input) => {
         const parameters = {
@@ -1682,6 +1774,49 @@ export function v0Tools(config: V0ToolsConfig = {}): V0ToolsFlat {
         return toToolResult(await client.settings.setPreviewHosts(parameters))
       },
     }),
+    usageGetActivity: tool({
+      description:
+        'Get Usage Activity: Returns chat and project activity for the active billing scope. Team owners and billing members receive team-wide activity by default; other team members receive their own activity.',
+      inputSchema: usageGetActivityInputSchema,
+      execute: async (input) => {
+        const parameters = {
+          start: input.start === undefined ? undefined : new Date(input.start),
+          end: input.end === undefined ? undefined : new Date(input.end),
+          userId: input.userId,
+        }
+        return toToolResult(await client.usage.getActivity(parameters))
+      },
+    }),
+    usageGetSummary: tool({
+      description:
+        'Get Usage Summary: Returns credit usage for the active billing scope. Team owners and billing members receive team-wide usage by default; other team members receive their own usage.',
+      inputSchema: usageGetSummaryInputSchema,
+      execute: async (input) => {
+        const parameters = {
+          start: input.start === undefined ? undefined : new Date(input.start),
+          end: input.end === undefined ? undefined : new Date(input.end),
+          userId: input.userId,
+        }
+        return toToolResult(await client.usage.getSummary(parameters))
+      },
+    }),
+    usageListEvents: tool({
+      description:
+        'List Usage Events: Lists individual credit usage events. Each event includes the credits charged and, when available, associated token counts.',
+      inputSchema: usageListEventsInputSchema,
+      execute: async (input) => {
+        const parameters = {
+          start: input.start === undefined ? undefined : new Date(input.start),
+          end: input.end === undefined ? undefined : new Date(input.end),
+          userId: input.userId,
+          chatId: input.chatId,
+          messageId: input.messageId,
+          limit: input.limit,
+          cursor: input.cursor,
+        }
+        return toToolResult(await client.usage.listEvents(parameters))
+      },
+    }),
     webhooksCreate: tool({
       description:
         'Create Webhook: Creates a new webhook that listens for specific events. Supports optional association with a chat.',
@@ -1787,6 +1922,11 @@ export function v0ToolsByCategory(config: V0ToolsConfig = {}): V0ToolsByCategory
     settings: {
       settingsGetPreviewHosts: pickTool(tools, 'settingsGetPreviewHosts'),
       settingsSetPreviewHosts: pickTool(tools, 'settingsSetPreviewHosts'),
+    },
+    usage: {
+      usageGetActivity: pickTool(tools, 'usageGetActivity'),
+      usageGetSummary: pickTool(tools, 'usageGetSummary'),
+      usageListEvents: pickTool(tools, 'usageListEvents'),
     },
     webhooks: {
       webhooksCreate: pickTool(tools, 'webhooksCreate'),

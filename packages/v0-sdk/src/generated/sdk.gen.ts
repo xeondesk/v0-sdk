@@ -2,8 +2,8 @@
 
 import { buildClientParams, type Client, type Options as Options2, type TDataShape } from './client';
 import { client } from './client.gen';
-import { chatsCreateFromFilesResponseTransformer, chatsCreateFromRepoResponseTransformer, chatsCreateFromZipResponseTransformer, chatsCreateResponseTransformer, chatsDuplicateResponseTransformer, chatsGetPreviewResponseTransformer, chatsGetResponseTransformer, chatsListResponseTransformer, chatsRestoreMessageResponseTransformer, chatsUpdateFilesResponseTransformer, chatsUpdateResponseTransformer, mcpServersCreateResponseTransformer, mcpServersGetResponseTransformer, mcpServersListResponseTransformer, mcpServersUpdateResponseTransformer, messagesGetResponseTransformer, messagesListResponseTransformer, messagesResolveResponseTransformer, messagesSendResponseTransformer, webhooksCreateResponseTransformer, webhooksGetResponseTransformer, webhooksUpdateResponseTransformer } from './transformers.gen';
-import type { ChatsCreateAsyncErrors, ChatsCreateAsyncResponses, ChatsCreateErrors, ChatsCreateFromFilesErrors, ChatsCreateFromFilesResponses, ChatsCreateFromRepoErrors, ChatsCreateFromRepoResponses, ChatsCreateFromZipErrors, ChatsCreateFromZipResponses, ChatsCreateResponses, ChatsCreateStreamErrors, ChatsCreateStreamResponses, ChatsCreateVercelProjectErrors, ChatsCreateVercelProjectResponses, ChatsDeleteErrors, ChatsDeleteResponses, ChatsDeployErrors, ChatsDeployResponses, ChatsDownloadFilesErrors, ChatsDownloadFilesResponses, ChatsDuplicateErrors, ChatsDuplicateResponses, ChatsGetConnectStatusErrors, ChatsGetConnectStatusResponses, ChatsGetErrors, ChatsGetFilesErrors, ChatsGetFilesResponses, ChatsGetPreviewErrors, ChatsGetPreviewResponses, ChatsGetResponses, ChatsListErrors, ChatsListResponses, ChatsRestoreMessageErrors, ChatsRestoreMessageResponses, ChatsResumeErrors, ChatsResumeResponses, ChatsUpdateErrors, ChatsUpdateFilesErrors, ChatsUpdateFilesResponses, ChatsUpdateResponses, McpServersCreateErrors, McpServersCreateResponses, McpServersDeleteErrors, McpServersDeleteResponses, McpServersGetErrors, McpServersGetResponses, McpServersListErrors, McpServersListResponses, McpServersUpdateErrors, McpServersUpdateResponses, MessagesGetErrors, MessagesGetResponses, MessagesListErrors, MessagesListResponses, MessagesResolveAsyncErrors, MessagesResolveAsyncResponses, MessagesResolveErrors, MessagesResolveResponses, MessagesResolveStreamErrors, MessagesResolveStreamResponses, MessagesSendAsyncErrors, MessagesSendAsyncResponses, MessagesSendErrors, MessagesSendResponses, MessagesSendStreamErrors, MessagesSendStreamResponses, MessagesStopErrors, MessagesStopResponses, SettingsGetPreviewHostsErrors, SettingsGetPreviewHostsResponses, SettingsSetPreviewHostsErrors, SettingsSetPreviewHostsResponses, WebhooksCreateErrors, WebhooksCreateResponses, WebhooksDeleteErrors, WebhooksDeleteResponses, WebhooksGetErrors, WebhooksGetResponses, WebhooksListErrors, WebhooksListResponses, WebhooksUpdateErrors, WebhooksUpdateResponses } from './types.gen';
+import { chatsCreateFromFilesResponseTransformer, chatsCreateFromRepoResponseTransformer, chatsCreateFromZipResponseTransformer, chatsCreateResponseTransformer, chatsDuplicateResponseTransformer, chatsGetPreviewResponseTransformer, chatsGetResponseTransformer, chatsListResponseTransformer, chatsRestoreMessageResponseTransformer, chatsUpdateFilesResponseTransformer, chatsUpdateResponseTransformer, mcpServersCreateResponseTransformer, mcpServersGetResponseTransformer, mcpServersListResponseTransformer, mcpServersUpdateResponseTransformer, messagesGetResponseTransformer, messagesListResponseTransformer, messagesResolveResponseTransformer, messagesSendResponseTransformer, usageGetActivityResponseTransformer, usageGetSummaryResponseTransformer, usageListEventsResponseTransformer, webhooksCreateResponseTransformer, webhooksGetResponseTransformer, webhooksUpdateResponseTransformer } from './transformers.gen';
+import type { ChatsCreateAsyncErrors, ChatsCreateAsyncResponses, ChatsCreateErrors, ChatsCreateFromFilesErrors, ChatsCreateFromFilesResponses, ChatsCreateFromRepoErrors, ChatsCreateFromRepoResponses, ChatsCreateFromZipErrors, ChatsCreateFromZipResponses, ChatsCreateResponses, ChatsCreateStreamErrors, ChatsCreateStreamResponses, ChatsCreateVercelProjectErrors, ChatsCreateVercelProjectResponses, ChatsDeleteErrors, ChatsDeleteResponses, ChatsDeployErrors, ChatsDeployResponses, ChatsDownloadFilesErrors, ChatsDownloadFilesResponses, ChatsDuplicateErrors, ChatsDuplicateResponses, ChatsGetConnectStatusErrors, ChatsGetConnectStatusResponses, ChatsGetErrors, ChatsGetFilesErrors, ChatsGetFilesResponses, ChatsGetPreviewErrors, ChatsGetPreviewResponses, ChatsGetResponses, ChatsListErrors, ChatsListResponses, ChatsRestoreMessageErrors, ChatsRestoreMessageResponses, ChatsResumeErrors, ChatsResumeResponses, ChatsUpdateErrors, ChatsUpdateFilesErrors, ChatsUpdateFilesResponses, ChatsUpdateResponses, McpServersCreateErrors, McpServersCreateResponses, McpServersDeleteErrors, McpServersDeleteResponses, McpServersGetErrors, McpServersGetResponses, McpServersListErrors, McpServersListResponses, McpServersUpdateErrors, McpServersUpdateResponses, MessagesGetErrors, MessagesGetResponses, MessagesListErrors, MessagesListResponses, MessagesResolveAsyncErrors, MessagesResolveAsyncResponses, MessagesResolveErrors, MessagesResolveResponses, MessagesResolveStreamErrors, MessagesResolveStreamResponses, MessagesSendAsyncErrors, MessagesSendAsyncResponses, MessagesSendErrors, MessagesSendResponses, MessagesSendStreamErrors, MessagesSendStreamResponses, MessagesStopErrors, MessagesStopResponses, SettingsGetPreviewHostsErrors, SettingsGetPreviewHostsResponses, SettingsSetPreviewHostsErrors, SettingsSetPreviewHostsResponses, UsageGetActivityErrors, UsageGetActivityResponses, UsageGetSummaryErrors, UsageGetSummaryResponses, UsageListEventsErrors, UsageListEventsResponses, WebhooksCreateErrors, WebhooksCreateResponses, WebhooksDeleteErrors, WebhooksDeleteResponses, WebhooksGetErrors, WebhooksGetResponses, WebhooksListErrors, WebhooksListResponses, WebhooksUpdateErrors, WebhooksUpdateResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -98,9 +98,18 @@ export class Chats extends HeyApiClient {
         };
         attachments?: Array<{
             /**
-             * URL of the attachment.
+             * URL or data URI containing the attachment.
              */
             url: string;
+        } | {
+            /**
+             * Display name for the inline text attachment.
+             */
+            name?: string;
+            /**
+             * UTF-8 text content of the attachment.
+             */
+            content: string;
         }>;
         mcpServerIds?: Array<string>;
         skills?: Array<{
@@ -303,9 +312,18 @@ export class Chats extends HeyApiClient {
         };
         attachments?: Array<{
             /**
-             * URL of the attachment.
+             * URL or data URI containing the attachment.
              */
             url: string;
+        } | {
+            /**
+             * Display name for the inline text attachment.
+             */
+            name?: string;
+            /**
+             * UTF-8 text content of the attachment.
+             */
+            content: string;
         }>;
         mcpServerIds?: Array<string>;
         skills?: Array<{
@@ -390,9 +408,18 @@ export class Chats extends HeyApiClient {
         };
         attachments?: Array<{
             /**
-             * URL of the attachment.
+             * URL or data URI containing the attachment.
              */
             url: string;
+        } | {
+            /**
+             * Display name for the inline text attachment.
+             */
+            name?: string;
+            /**
+             * UTF-8 text content of the attachment.
+             */
+            content: string;
         }>;
         mcpServerIds?: Array<string>;
         skills?: Array<{
@@ -786,9 +813,18 @@ export class Messages extends HeyApiClient {
         mcpServerIds?: Array<string>;
         attachments?: Array<{
             /**
-             * URL of the attachment.
+             * URL or data URI containing the attachment.
              */
             url: string;
+        } | {
+            /**
+             * Display name for the inline text attachment.
+             */
+            name?: string;
+            /**
+             * UTF-8 text content of the attachment.
+             */
+            content: string;
         }>;
         skills?: Array<{
             /**
@@ -887,9 +923,18 @@ export class Messages extends HeyApiClient {
         mcpServerIds?: Array<string>;
         attachments?: Array<{
             /**
-             * URL of the attachment.
+             * URL or data URI containing the attachment.
              */
             url: string;
+        } | {
+            /**
+             * Display name for the inline text attachment.
+             */
+            name?: string;
+            /**
+             * UTF-8 text content of the attachment.
+             */
+            content: string;
         }>;
         skills?: Array<{
             /**
@@ -968,9 +1013,18 @@ export class Messages extends HeyApiClient {
         mcpServerIds?: Array<string>;
         attachments?: Array<{
             /**
-             * URL of the attachment.
+             * URL or data URI containing the attachment.
              */
             url: string;
+        } | {
+            /**
+             * Display name for the inline text attachment.
+             */
+            name?: string;
+            /**
+             * UTF-8 text content of the attachment.
+             */
+            content: string;
         }>;
         skills?: Array<{
             /**
@@ -1101,6 +1155,10 @@ export class Messages extends HeyApiClient {
                  */
                 input: unknown;
                 /**
+                 * The tool's original human-readable name from the stopped task. Display-only; pass back unchanged. Capped at 100 characters, matching the cap applied when the name is ingested from the server.
+                 */
+                toolDisplayName?: string | null;
+                /**
                  * Label shown while the tool is running (e.g. "Running migration").
                  */
                 taskNameActive?: string | null;
@@ -1224,6 +1282,10 @@ export class Messages extends HeyApiClient {
                  */
                 input: unknown;
                 /**
+                 * The tool's original human-readable name from the stopped task. Display-only; pass back unchanged. Capped at 100 characters, matching the cap applied when the name is ingested from the server.
+                 */
+                toolDisplayName?: string | null;
+                /**
                  * Label shown while the tool is running (e.g. "Running migration").
                  */
                 taskNameActive?: string | null;
@@ -1346,6 +1408,10 @@ export class Messages extends HeyApiClient {
                  */
                 input: unknown;
                 /**
+                 * The tool's original human-readable name from the stopped task. Display-only; pass back unchanged. Capped at 100 characters, matching the cap applied when the name is ingested from the server.
+                 */
+                toolDisplayName?: string | null;
+                /**
                  * Label shown while the tool is running (e.g. "Running migration").
                  */
                 taskNameActive?: string | null;
@@ -1431,7 +1497,7 @@ export class McpServers extends HeyApiClient {
     /**
      * Create MCP Server
      *
-     * Creates a new MCP server configuration. Limited to 10 servers per user.
+     * Creates a new MCP server configuration. Limited to 100 servers per user.
      */
     public create<ThrowOnError extends boolean = false>(parameters: {
         name: string;
@@ -1655,6 +1721,88 @@ export class Settings extends HeyApiClient {
     }
 }
 
+export class Usage extends HeyApiClient {
+    /**
+     * Get Usage Summary
+     *
+     * Returns credit usage for the active billing scope. Team owners and billing members receive team-wide usage by default; other team members receive their own usage.
+     */
+    public getSummary<ThrowOnError extends boolean = false>(parameters?: {
+        start?: Date;
+        end?: Date;
+        userId?: string;
+    }, options?: Options<never, ThrowOnError>) {
+        const params = buildClientParams([parameters], [{ args: [
+                    { in: 'query', key: 'start' },
+                    { in: 'query', key: 'end' },
+                    { in: 'query', key: 'userId' }
+                ] }]);
+        return (options?.client ?? this.client).get<UsageGetSummaryResponses, UsageGetSummaryErrors, ThrowOnError>({
+            responseTransformer: usageGetSummaryResponseTransformer,
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/usage/summary',
+            ...options,
+            ...params
+        });
+    }
+    
+    /**
+     * List Usage Events
+     *
+     * Lists individual credit usage events. Each event includes the credits charged and, when available, associated token counts.
+     */
+    public listEvents<ThrowOnError extends boolean = false>(parameters?: {
+        start?: Date;
+        end?: Date;
+        userId?: string;
+        chatId?: string;
+        messageId?: string;
+        limit?: number;
+        cursor?: string;
+    }, options?: Options<never, ThrowOnError>) {
+        const params = buildClientParams([parameters], [{ args: [
+                    { in: 'query', key: 'start' },
+                    { in: 'query', key: 'end' },
+                    { in: 'query', key: 'userId' },
+                    { in: 'query', key: 'chatId' },
+                    { in: 'query', key: 'messageId' },
+                    { in: 'query', key: 'limit' },
+                    { in: 'query', key: 'cursor' }
+                ] }]);
+        return (options?.client ?? this.client).get<UsageListEventsResponses, UsageListEventsErrors, ThrowOnError>({
+            responseTransformer: usageListEventsResponseTransformer,
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/usage/events',
+            ...options,
+            ...params
+        });
+    }
+    
+    /**
+     * Get Usage Activity
+     *
+     * Returns chat and project activity for the active billing scope. Team owners and billing members receive team-wide activity by default; other team members receive their own activity.
+     */
+    public getActivity<ThrowOnError extends boolean = false>(parameters?: {
+        start?: Date;
+        end?: Date;
+        userId?: string;
+    }, options?: Options<never, ThrowOnError>) {
+        const params = buildClientParams([parameters], [{ args: [
+                    { in: 'query', key: 'start' },
+                    { in: 'query', key: 'end' },
+                    { in: 'query', key: 'userId' }
+                ] }]);
+        return (options?.client ?? this.client).get<UsageGetActivityResponses, UsageGetActivityErrors, ThrowOnError>({
+            responseTransformer: usageGetActivityResponseTransformer,
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/usage/activity',
+            ...options,
+            ...params
+        });
+    }
+}
+
 export class Webhooks extends HeyApiClient {
     /**
      * List Webhooks
@@ -1796,6 +1944,11 @@ export class V0Sdk extends HeyApiClient {
     private _settings?: Settings;
     get settings(): Settings {
         return this._settings ??= new Settings({ client: this.client });
+    }
+    
+    private _usage?: Usage;
+    get usage(): Usage {
+        return this._usage ??= new Usage({ client: this.client });
     }
     
     private _webhooks?: Webhooks;
