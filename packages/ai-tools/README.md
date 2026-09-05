@@ -8,9 +8,12 @@ same OpenAPI document used to generate the `v0` SDK. Every OpenAPI operation is
 exposed with a canonical key derived from its full `operationId`.
 
 ```ts
+import { createOpenRouter } from '@openrouter/ai-sdk-provider'
 import { generateText } from 'ai'
-import { openai } from '@ai-sdk/openai'
 import { v0Tools, v0ToolsByCategory } from '@v0-sdk/ai-tools'
+
+const openrouter = createOpenRouter({ apiKey: process.env.OPENROUTER_API_KEY })
+const model = openrouter(process.env.OPENROUTER_MODEL ?? 'openrouter/auto')
 
 const allTools = v0Tools({ auth: process.env.V0_API_KEY })
 
@@ -19,7 +22,7 @@ const { chats, messages } = v0ToolsByCategory({
 })
 
 await generateText({
-  model: openai('gpt-4.1'),
+  model,
   tools: {
     ...chats,
     ...messages,
