@@ -80,6 +80,7 @@ jobs:
             alex-grover
             rickeyswuave
             xeondesk
+            khulnasoft-bot
           body: |
             Fetches the latest OpenAPI document from the production API and regenerates the TypeScript SDK, AI tools, and React hooks.
 
