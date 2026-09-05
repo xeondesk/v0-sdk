@@ -7,17 +7,12 @@ import { usePathname, useRouter } from 'next/navigation'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Button } from '@/components/ui/button'
 import { ChatItem } from '@/components/layout/chat-item'
-import { ApiKeyDialog } from '@/components/layout/api-key-dialog'
 import type { getSidebarChats } from '@/lib/sidebar-chats'
 import { cn } from '@/lib/utils'
 import { ChevronDownIcon, ChevronRightIcon, SidebarToggleIcon } from '@/lib/icons'
 
 type SidebarProps = {
   open: boolean
-  apiKeyStatus: {
-    hasBrowserApiKey: boolean
-    hasEnvironmentApiKey: boolean
-  }
   onToggle: () => void
   sidebarChats: ReturnType<typeof getSidebarChats>
 }
@@ -26,11 +21,7 @@ export function Sidebar(props: SidebarProps) {
   return (
     <Suspense
       fallback={
-        <SidebarSkeleton
-          apiKeyStatus={props.apiKeyStatus}
-          onToggle={props.onToggle}
-          open={props.open}
-        />
+        <SidebarSkeleton onToggle={props.onToggle} open={props.open} />
       }
     >
       <SidebarContent {...props} />
@@ -38,11 +29,7 @@ export function Sidebar(props: SidebarProps) {
   )
 }
 
-function SidebarSkeleton({
-  open,
-  apiKeyStatus,
-  onToggle,
-}: Pick<SidebarProps, 'open' | 'apiKeyStatus' | 'onToggle'>) {
+function SidebarSkeleton({ open, onToggle }: Pick<SidebarProps, 'open' | 'onToggle'>) {
   return (
     <aside
       aria-busy="true"
@@ -100,7 +87,6 @@ function SidebarSkeleton({
           </div>
 
           <div className="flex-1" />
-          <ApiKeyDialog {...apiKeyStatus} />
         </div>
       ) : null}
     </aside>
@@ -115,7 +101,7 @@ function ChatNamesSkeleton() {
   )
 }
 
-function SidebarContent({ open, apiKeyStatus, onToggle, sidebarChats }: SidebarProps) {
+function SidebarContent({ open, onToggle, sidebarChats }: SidebarProps) {
   const initialChats = use(sidebarChats)
   const pathname = usePathname()
   const router = useRouter()
@@ -257,7 +243,6 @@ function SidebarContent({ open, apiKeyStatus, onToggle, sidebarChats }: SidebarP
           </Collapsible>
 
           <div className="flex-1" />
-          <ApiKeyDialog {...apiKeyStatus} />
         </div>
       ) : null}
     </aside>

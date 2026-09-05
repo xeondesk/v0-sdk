@@ -1,34 +1,33 @@
-import type { ChatsUpdateFilesData } from 'v0'
-import { toV0JsonResponse } from '@/lib/v0-response'
 import { authorizeProxyRequest } from '@/lib/proxy'
-import { v0 } from '@/lib/v0-client'
+import { getChat, getFiles, patchFiles } from '@/lib/chat-store'
 
-type UpdateFilesBody = ChatsUpdateFilesData['body']
-type RouteContext = { params: Promise<{ chatId: string }> }
-
-export async function GET(request: Request, { params }: RouteContext) {
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ chatId: string }> },
+) {
   const denied = authorizeProxyRequest(request)
   if (denied) return denied
-  const { chatId } = await params
-  const result = await v0.chats.getFiles({ chatId })
 
-  return toV0JsonResponse(result)
+  const { chatId } = await params
+  if (!getChat(chatId)) return Response.json({ message: 'Chat not found.' }, { status: 404 })
+
+  return Response.json({ files: getFiles(chatId) })
 }
 
-export async function PATCH(request: Request, { params }: RouteContext) {
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ chatId: string }> },
+) {
   const denied = authorizeProxyRequest(request)
   if (denied) return denied
+
   const { chatId } = await params
-  const body = (await request.json().catch(() => null)) as UpdateFilesBody | null
+  if (!getChat(chatId)) return Response.json({ message: 'Chat not found.' }, { status: 404 })
 
-  if (!Array.isArray(body?.files) || body.files.length === 0) {
-    return Response.json({ message: 'At least one file update is required.' }, { status: 400 })
+  const body = (await request.json().catch(() => ({}))) as {
+    files?: Array<{ path: string; content: string }>
   }
+  patchFiles(chatId, body.files ?? [])
 
-  const result = await v0.chats.updateFiles({
-    chatId,
-    files: body.files,
-  })
-
-  return toV0JsonResponse(result)
+  return Response.json({ files: getFiles(chatId), messages: [] })
 }

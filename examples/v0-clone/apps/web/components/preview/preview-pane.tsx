@@ -1,41 +1,25 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
-import { usePreviewProxyOrigin } from '@/components/preview/preview-proxy-provider'
+import { useEffect } from 'react'
 
+// OpenRouter-backed chat replies generate text only, so there is no deployed
+// preview to render. The empty state keeps the Preview/Code view toggle and
+// the code editor's save gating (`isPreviewReady`) working.
 export function PreviewPane({
-  chatId,
   onReadyChange,
 }: {
-  chatId: string
   onReadyChange?: (ready: boolean) => void
 }) {
-  const iframeRef = useRef<HTMLIFrameElement>(null)
-  const previewProxyOrigin = usePreviewProxyOrigin()
-  const previewPath = `/api/v0-preview/${encodeURIComponent(chatId)}`
-  const previewUrl = new URL(previewPath, previewProxyOrigin).toString()
-
   useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      if (event.origin !== previewProxyOrigin) return
-      if (event.source !== iframeRef.current?.contentWindow) return
-      if (event.data?.type !== 'v0-preview-loading') return
-
-      onReadyChange?.(false)
-    }
-
-    window.addEventListener('message', handleMessage)
-    return () => window.removeEventListener('message', handleMessage)
-  }, [onReadyChange, previewProxyOrigin])
+    onReadyChange?.(true)
+  }, [onReadyChange])
 
   return (
-    <iframe
-      className="h-full w-full bg-background"
-      onLoad={() => onReadyChange?.(true)}
-      ref={iframeRef}
-      sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation"
-      src={previewUrl}
-      title="Chat preview"
-    />
+    <div className="flex h-full items-center justify-center px-6">
+      <div className="max-w-sm text-center text-sm text-muted-foreground">
+        No preview is available. This demo generates plain-text responses and stores them in
+        memory, so there is nothing deployed to render here.
+      </div>
+    </div>
   )
 }

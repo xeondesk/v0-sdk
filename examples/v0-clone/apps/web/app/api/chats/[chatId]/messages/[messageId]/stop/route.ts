@@ -1,6 +1,5 @@
-import { toV0JsonResponse } from '@/lib/v0-response'
 import { authorizeProxyRequest } from '@/lib/proxy'
-import { v0 } from '@/lib/v0-client'
+import { stopStream } from '@/lib/chat-store'
 
 export async function POST(
   request: Request,
@@ -8,8 +7,8 @@ export async function POST(
 ) {
   const denied = authorizeProxyRequest(request)
   if (denied) return denied
-  const { chatId, messageId } = await params
-  const result = await v0.messages.stop({ chatId, messageId })
 
-  return toV0JsonResponse(result)
+  const { messageId } = await params
+  stopStream(messageId)
+  return Response.json({ id: messageId })
 }

@@ -3,10 +3,10 @@
 import { useSyncExternalStore } from 'react'
 
 export const MODEL_LABELS = {
-  'v0-mini': 'v0 Mini',
-  'v0-pro': 'v0 Pro',
-  'v0-max': 'v0 Max',
-  'v0-max-fast': 'v0 Max Fast',
+  'openrouter/auto': 'OpenRouter Auto (Recommended)',
+  'anthropic/claude-sonnet-4': 'Claude Sonnet 4',
+  'openai/gpt-5': 'GPT-5',
+  'google/gemini-2.5-pro-preview': 'Gemini 2.5 Pro',
 } as const
 
 export type ModelType = keyof typeof MODEL_LABELS
@@ -18,7 +18,7 @@ export interface Settings {
 export const AVAILABLE_MODELS = Object.keys(MODEL_LABELS) as ModelType[]
 
 const DEFAULT_SETTINGS: Settings = {
-  model: 'v0-max',
+  model: 'openrouter/auto',
 }
 
 const SETTINGS_STORAGE_KEY = 'v0-clone-settings'
