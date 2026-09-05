@@ -94,9 +94,13 @@ export type ChatWithUsage = {
         writePermission: boolean;
     };
     /**
-     * Token usage and credit cost for prompt.
+     * Model, token usage, and credit cost for the prompt.
      */
     usage: {
+        /**
+         * Model identifier used for the assistant message, or null when not applicable or unavailable.
+         */
+        model: string | null;
         /**
          * Token counts for this message.
          */
@@ -243,9 +247,13 @@ export type ChatStreamEvent = {
      */
     object: 'message.usage';
     /**
-     * Token usage and credit cost. All values are zero on user messages and on assistant messages that have not generated tokens.
+     * Model identifier, token usage, and credit cost. Token and credit values are zero on user messages and on assistant messages that have not generated tokens.
      */
     usage: {
+        /**
+         * Model identifier used for the assistant message, or null when not applicable or unavailable.
+         */
+        model: string | null;
         /**
          * Token counts for this message.
          */
@@ -462,9 +470,13 @@ export type Message = {
     } | {
         type: 'tool-call';
         /**
-         * The name of the tool that was invoked (e.g. an MCP tool name or built-in tool identifier).
+         * The identifier the tool was invoked under. For MCP/integration tools this is a normalized identifier derived from the tool name — prefer `toolDisplayName` for display when present.
          */
         name: string;
+        /**
+         * The tool's original human-readable name (an MCP/integration tool's server-side name), when `name` is a normalized identifier. Display-only.
+         */
+        toolDisplayName?: string | null;
         /**
          * The arguments passed to the tool. Schema depends on the specific tool.
          */
@@ -493,6 +505,10 @@ export type Message = {
              * The tool input this permission authorizes. Pass back unchanged when resolving.
              */
             input?: unknown;
+            /**
+             * The tool's original human-readable name (an MCP/integration tool's server name), when `toolName` is a normalized identifier. Display-only; pass back unchanged.
+             */
+            toolDisplayName?: string | null;
             /**
              * Internal label for the in-progress task. Pass back unchanged.
              */
@@ -725,9 +741,13 @@ export type Message = {
      */
     authorId: string | null;
     /**
-     * Token usage and credit cost. All values are zero on user messages and on assistant messages that have not yet generated tokens.
+     * Model identifier, token usage, and credit cost. Token and credit values are zero on user messages and on assistant messages that have not yet generated tokens.
      */
     usage: {
+        /**
+         * Model identifier used for the assistant message, or null when not applicable or unavailable.
+         */
+        model: string | null;
         /**
          * Token counts for this message.
          */
@@ -928,9 +948,13 @@ export type MessageListResponse = {
         } | {
             type: 'tool-call';
             /**
-             * The name of the tool that was invoked (e.g. an MCP tool name or built-in tool identifier).
+             * The identifier the tool was invoked under. For MCP/integration tools this is a normalized identifier derived from the tool name — prefer `toolDisplayName` for display when present.
              */
             name: string;
+            /**
+             * The tool's original human-readable name (an MCP/integration tool's server-side name), when `name` is a normalized identifier. Display-only.
+             */
+            toolDisplayName?: string | null;
             /**
              * The arguments passed to the tool. Schema depends on the specific tool.
              */
@@ -959,6 +983,10 @@ export type MessageListResponse = {
                  * The tool input this permission authorizes. Pass back unchanged when resolving.
                  */
                 input?: unknown;
+                /**
+                 * The tool's original human-readable name (an MCP/integration tool's server name), when `toolName` is a normalized identifier. Display-only; pass back unchanged.
+                 */
+                toolDisplayName?: string | null;
                 /**
                  * Internal label for the in-progress task. Pass back unchanged.
                  */
@@ -1191,9 +1219,13 @@ export type MessageListResponse = {
          */
         authorId: string | null;
         /**
-         * Token usage and credit cost. All values are zero on user messages and on assistant messages that have not yet generated tokens.
+         * Model identifier, token usage, and credit cost. Token and credit values are zero on user messages and on assistant messages that have not yet generated tokens.
          */
         usage: {
+            /**
+             * Model identifier used for the assistant message, or null when not applicable or unavailable.
+             */
+            model: string | null;
             /**
              * Token counts for this message.
              */
@@ -1408,9 +1440,13 @@ export type MessageStreamEvent = {
     } | {
         type: 'tool-call';
         /**
-         * The name of the tool that was invoked (e.g. an MCP tool name or built-in tool identifier).
+         * The identifier the tool was invoked under. For MCP/integration tools this is a normalized identifier derived from the tool name — prefer `toolDisplayName` for display when present.
          */
         name: string;
+        /**
+         * The tool's original human-readable name (an MCP/integration tool's server-side name), when `name` is a normalized identifier. Display-only.
+         */
+        toolDisplayName?: string | null;
         /**
          * The arguments passed to the tool. Schema depends on the specific tool.
          */
@@ -1439,6 +1475,10 @@ export type MessageStreamEvent = {
              * The tool input this permission authorizes. Pass back unchanged when resolving.
              */
             input?: unknown;
+            /**
+             * The tool's original human-readable name (an MCP/integration tool's server name), when `toolName` is a normalized identifier. Display-only; pass back unchanged.
+             */
+            toolDisplayName?: string | null;
             /**
              * Internal label for the in-progress task. Pass back unchanged.
              */
@@ -1671,9 +1711,13 @@ export type MessageStreamEvent = {
      */
     authorId: string | null;
     /**
-     * Token usage and credit cost. All values are zero on user messages and on assistant messages that have not yet generated tokens.
+     * Model identifier, token usage, and credit cost. Token and credit values are zero on user messages and on assistant messages that have not yet generated tokens.
      */
     usage: {
+        /**
+         * Model identifier used for the assistant message, or null when not applicable or unavailable.
+         */
+        model: string | null;
         /**
          * Token counts for this message.
          */
@@ -1752,9 +1796,13 @@ export type MessageStreamEvent = {
      */
     object: 'message.usage';
     /**
-     * Token usage and credit cost. All values are zero on user messages and on assistant messages that have not generated tokens.
+     * Model identifier, token usage, and credit cost. Token and credit values are zero on user messages and on assistant messages that have not generated tokens.
      */
     usage: {
+        /**
+         * Model identifier used for the assistant message, or null when not applicable or unavailable.
+         */
+        model: string | null;
         /**
          * Token counts for this message.
          */
@@ -2004,6 +2052,381 @@ export type TrustedPreviewHosts = {
     hosts: Array<string>;
 };
 
+export type UsageActivity = {
+    /**
+     * Object type identifier.
+     */
+    object: 'usage_activity';
+    /**
+     * Time range covered by the response.
+     */
+    range: {
+        /**
+         * Inclusive ISO 8601 start timestamp.
+         */
+        start: Date;
+        /**
+         * Exclusive ISO 8601 end timestamp.
+         */
+        end: Date;
+    };
+    /**
+     * Authorized billing scope used for this response.
+     */
+    scope: {
+        /**
+         * Billing scope identifier.
+         */
+        id: string;
+        /**
+         * Billing scope type.
+         */
+        type: 'team' | 'personal';
+        /**
+         * Whether the response includes usage for the entire team.
+         */
+        isTeamWide: boolean;
+        /**
+         * User attribution applied to the response, when filtered.
+         */
+        userId?: string;
+    };
+    summary: {
+        /**
+         * Distinct active users.
+         */
+        activeUsers: number;
+        /**
+         * Distinct active days.
+         */
+        activeDays: number;
+        /**
+         * Distinct active chats.
+         */
+        chatCount: number;
+        /**
+         * Assistant messages.
+         */
+        messageCount: number;
+    };
+    /**
+     * Activity grouped by Vercel project or draft status.
+     */
+    projects: Array<{
+        /**
+         * Project grouping type.
+         */
+        kind: 'project' | 'drafts' | 'unavailable';
+        /**
+         * Vercel project identifier, when available.
+         */
+        vercelProjectId: string | null;
+        /**
+         * Project grouping display name.
+         */
+        name: string;
+        /**
+         * Distinct active chats.
+         */
+        chatCount: number;
+        /**
+         * Assistant messages.
+         */
+        messageCount: number;
+        /**
+         * Distinct active days.
+         */
+        activeDays: number;
+        /**
+         * First activity timestamp.
+         */
+        firstActivity: Date;
+        /**
+         * Most recent activity timestamp.
+         */
+        lastActivity: Date;
+    }>;
+    /**
+     * Activity grouped by chat.
+     */
+    chats: Array<{
+        /**
+         * Chat availability type.
+         */
+        kind: 'chat' | 'unavailable';
+        /**
+         * Chat identifier.
+         */
+        chatId: string;
+        /**
+         * Chat title or availability label.
+         */
+        title: string;
+        /**
+         * Associated Vercel project identifier.
+         */
+        vercelProjectId: string | null;
+        /**
+         * Associated project name.
+         */
+        projectName: string | null;
+        /**
+         * Assistant messages.
+         */
+        messageCount: number;
+        /**
+         * Distinct active days.
+         */
+        activeDays: number;
+        /**
+         * First activity timestamp.
+         */
+        firstActivity: Date;
+        /**
+         * Most recent activity timestamp.
+         */
+        lastActivity: Date;
+    }>;
+};
+
+export type UsageSummary = {
+    /**
+     * Object type identifier.
+     */
+    object: 'usage_summary';
+    /**
+     * Time range covered by the response.
+     */
+    range: {
+        /**
+         * Inclusive ISO 8601 start timestamp.
+         */
+        start: Date;
+        /**
+         * Exclusive ISO 8601 end timestamp.
+         */
+        end: Date;
+    };
+    /**
+     * Authorized billing scope used for this response.
+     */
+    scope: {
+        /**
+         * Billing scope identifier.
+         */
+        id: string;
+        /**
+         * Billing scope type.
+         */
+        type: 'team' | 'personal';
+        /**
+         * Whether the response includes usage for the entire team.
+         */
+        isTeamWide: boolean;
+        /**
+         * User attribution applied to the response, when filtered.
+         */
+        userId?: string;
+    };
+    /**
+     * Credits consumed during the selected range.
+     */
+    credits: {
+        /**
+         * Credits consumed from included plan credits.
+         */
+        plan: number;
+        /**
+         * Credits consumed from on-demand credits.
+         */
+        onDemand: number;
+        /**
+         * Total credits consumed.
+         */
+        total: number;
+    };
+    /**
+     * Daily credit totals in chronological order.
+     */
+    daily: Array<{
+        /**
+         * UTC date in YYYY-MM-DD format.
+         */
+        date: string;
+        /**
+         * Credits consumed during the selected range.
+         */
+        credits: {
+            /**
+             * Credits consumed from included plan credits.
+             */
+            plan: number;
+            /**
+             * Credits consumed from on-demand credits.
+             */
+            onDemand: number;
+            /**
+             * Total credits consumed.
+             */
+            total: number;
+        };
+    }>;
+    /**
+     * Timestamp of the reporting snapshot backing this response.
+     */
+    dataAsOf?: Date;
+};
+
+export type UsageEventList = {
+    /**
+     * Object type identifier.
+     */
+    object: 'list';
+    /**
+     * Time range covered by the response.
+     */
+    range: {
+        /**
+         * Inclusive ISO 8601 start timestamp.
+         */
+        start: Date;
+        /**
+         * Exclusive ISO 8601 end timestamp.
+         */
+        end: Date;
+    };
+    /**
+     * Authorized billing scope used for this response.
+     */
+    scope: {
+        /**
+         * Billing scope identifier.
+         */
+        id: string;
+        /**
+         * Billing scope type.
+         */
+        type: 'team' | 'personal';
+        /**
+         * Whether the response includes usage for the entire team.
+         */
+        isTeamWide: boolean;
+        /**
+         * User attribution applied to the response, when filtered.
+         */
+        userId?: string;
+    };
+    /**
+     * Usage events in this page.
+     */
+    data: Array<{
+        /**
+         * Billing event identifier.
+         */
+        id: string;
+        /**
+         * Object type identifier.
+         */
+        object: 'usage_event';
+        /**
+         * Kind of product usage represented by the event.
+         */
+        type: string;
+        /**
+         * Timestamp of the usage event.
+         */
+        createdAt: Date;
+        /**
+         * Attributed user identifier.
+         */
+        userId?: string;
+        /**
+         * Related chat identifier.
+         */
+        chatId?: string;
+        /**
+         * Related message identifier.
+         */
+        messageId?: string;
+        /**
+         * Model associated with the event.
+         */
+        model?: string;
+        /**
+         * Credit sources used by the event.
+         */
+        sources: Array<'plan' | 'on-demand'>;
+        /**
+         * Whether credits fully waived this event.
+         */
+        waived: boolean;
+        /**
+         * Persisted token counts, or null when the source message is unavailable.
+         */
+        tokens: {
+            /**
+             * Input amount excluding cached input.
+             */
+            input: number;
+            /**
+             * Output amount.
+             */
+            output: number;
+            /**
+             * Cache-read input amount.
+             */
+            cacheRead: number;
+            /**
+             * Cache-write input amount.
+             */
+            cacheWrite: number;
+            /**
+             * Total amount across all categories.
+             */
+            total: number;
+        } | null;
+        creditsCost: {
+            /**
+             * Input amount excluding cached input.
+             */
+            input: number;
+            /**
+             * Output amount.
+             */
+            output: number;
+            /**
+             * Cache-read input amount.
+             */
+            cacheRead: number;
+            /**
+             * Cache-write input amount.
+             */
+            cacheWrite: number;
+            /**
+             * Total amount across all categories.
+             */
+            total: number;
+            /**
+             * Credits charged after a full waiver.
+             */
+            charged: number;
+        };
+    }>;
+    /**
+     * Pagination state for this response.
+     */
+    pagination: {
+        /**
+         * Whether another page is available.
+         */
+        hasMore: boolean;
+        /**
+         * Cursor for the next page, or null at the end.
+         */
+        cursor: string | null;
+    };
+};
+
 /**
  * The event type that triggers a webhook. A webhook will be invoked whenever the specified lifecycle event occurs.
  */
@@ -2164,13 +2587,22 @@ export type ChatsCreateData = {
             imageGenerations: boolean;
         };
         /**
-         * Files or assets to include with the message.
+         * Files or assets to include with the message. Provide either a URL or data URI, or inline UTF-8 text content.
          */
         attachments?: Array<{
             /**
-             * URL of the attachment.
+             * URL or data URI containing the attachment.
              */
             url: string;
+        } | {
+            /**
+             * Display name for the inline text attachment.
+             */
+            name?: string;
+            /**
+             * UTF-8 text content of the attachment.
+             */
+            content: string;
         }>;
         /**
          * MCP server IDs to enable. When omitted, uses default enabled servers.
@@ -2487,13 +2919,22 @@ export type ChatsCreateStreamData = {
             imageGenerations: boolean;
         };
         /**
-         * Files or assets to include with the message.
+         * Files or assets to include with the message. Provide either a URL or data URI, or inline UTF-8 text content.
          */
         attachments?: Array<{
             /**
-             * URL of the attachment.
+             * URL or data URI containing the attachment.
              */
             url: string;
+        } | {
+            /**
+             * Display name for the inline text attachment.
+             */
+            name?: string;
+            /**
+             * UTF-8 text content of the attachment.
+             */
+            content: string;
         }>;
         /**
          * MCP server IDs to enable. When omitted, uses default enabled servers.
@@ -2612,13 +3053,22 @@ export type ChatsCreateAsyncData = {
             imageGenerations: boolean;
         };
         /**
-         * Files or assets to include with the message.
+         * Files or assets to include with the message. Provide either a URL or data URI, or inline UTF-8 text content.
          */
         attachments?: Array<{
             /**
-             * URL of the attachment.
+             * URL or data URI containing the attachment.
              */
             url: string;
+        } | {
+            /**
+             * Display name for the inline text attachment.
+             */
+            name?: string;
+            /**
+             * UTF-8 text content of the attachment.
+             */
+            content: string;
         }>;
         /**
          * MCP server IDs to enable. When omitted, uses default enabled servers.
@@ -2796,13 +3246,22 @@ export type MessagesSendData = {
          */
         mcpServerIds?: Array<string>;
         /**
-         * Files or assets to include with the message.
+         * Files or assets to include with the message. Provide either a URL or data URI, or inline UTF-8 text content.
          */
         attachments?: Array<{
             /**
-             * URL of the attachment.
+             * URL or data URI containing the attachment.
              */
             url: string;
+        } | {
+            /**
+             * Display name for the inline text attachment.
+             */
+            name?: string;
+            /**
+             * UTF-8 text content of the attachment.
+             */
+            content: string;
         }>;
         /**
          * A skill to force-attach to the chat. Skills provide domain-specific knowledge to the AI. Use `remote` for skills.sh skills, `memory` for user/team memory skills (including design-system skills), and `project` for skills defined in the chat repo.
@@ -2962,13 +3421,22 @@ export type MessagesSendStreamData = {
          */
         mcpServerIds?: Array<string>;
         /**
-         * Files or assets to include with the message.
+         * Files or assets to include with the message. Provide either a URL or data URI, or inline UTF-8 text content.
          */
         attachments?: Array<{
             /**
-             * URL of the attachment.
+             * URL or data URI containing the attachment.
              */
             url: string;
+        } | {
+            /**
+             * Display name for the inline text attachment.
+             */
+            name?: string;
+            /**
+             * UTF-8 text content of the attachment.
+             */
+            content: string;
         }>;
         /**
          * A skill to force-attach to the chat. Skills provide domain-specific knowledge to the AI. Use `remote` for skills.sh skills, `memory` for user/team memory skills (including design-system skills), and `project` for skills defined in the chat repo.
@@ -3078,13 +3546,22 @@ export type MessagesSendAsyncData = {
          */
         mcpServerIds?: Array<string>;
         /**
-         * Files or assets to include with the message.
+         * Files or assets to include with the message. Provide either a URL or data URI, or inline UTF-8 text content.
          */
         attachments?: Array<{
             /**
-             * URL of the attachment.
+             * URL or data URI containing the attachment.
              */
             url: string;
+        } | {
+            /**
+             * Display name for the inline text attachment.
+             */
+            name?: string;
+            /**
+             * UTF-8 text content of the attachment.
+             */
+            content: string;
         }>;
         /**
          * A skill to force-attach to the chat. Skills provide domain-specific knowledge to the AI. Use `remote` for skills.sh skills, `memory` for user/team memory skills (including design-system skills), and `project` for skills defined in the chat repo.
@@ -3237,6 +3714,10 @@ export type MessagesResolveData = {
                  * The tool call input arguments. Pass the exact input from the stopped task.
                  */
                 input: unknown;
+                /**
+                 * The tool's original human-readable name from the stopped task. Display-only; pass back unchanged. Capped at 100 characters, matching the cap applied when the name is ingested from the server.
+                 */
+                toolDisplayName?: string | null;
                 /**
                  * Label shown while the tool is running (e.g. "Running migration").
                  */
@@ -3391,6 +3872,10 @@ export type MessagesResolveStreamData = {
                  */
                 input: unknown;
                 /**
+                 * The tool's original human-readable name from the stopped task. Display-only; pass back unchanged. Capped at 100 characters, matching the cap applied when the name is ingested from the server.
+                 */
+                toolDisplayName?: string | null;
+                /**
                  * Label shown while the tool is running (e.g. "Running migration").
                  */
                 taskNameActive?: string | null;
@@ -3543,6 +4028,10 @@ export type MessagesResolveAsyncData = {
                  * The tool call input arguments. Pass the exact input from the stopped task.
                  */
                 input: unknown;
+                /**
+                 * The tool's original human-readable name from the stopped task. Display-only; pass back unchanged. Capped at 100 characters, matching the cap applied when the name is ingested from the server.
+                 */
+                toolDisplayName?: string | null;
                 /**
                  * Label shown while the tool is running (e.g. "Running migration").
                  */
@@ -4174,9 +4663,13 @@ export type ChatsUpdateFilesResponses = {
             } | {
                 type: 'tool-call';
                 /**
-                 * The name of the tool that was invoked (e.g. an MCP tool name or built-in tool identifier).
+                 * The identifier the tool was invoked under. For MCP/integration tools this is a normalized identifier derived from the tool name — prefer `toolDisplayName` for display when present.
                  */
                 name: string;
+                /**
+                 * The tool's original human-readable name (an MCP/integration tool's server-side name), when `name` is a normalized identifier. Display-only.
+                 */
+                toolDisplayName?: string | null;
                 /**
                  * The arguments passed to the tool. Schema depends on the specific tool.
                  */
@@ -4205,6 +4698,10 @@ export type ChatsUpdateFilesResponses = {
                      * The tool input this permission authorizes. Pass back unchanged when resolving.
                      */
                     input?: unknown;
+                    /**
+                     * The tool's original human-readable name (an MCP/integration tool's server name), when `toolName` is a normalized identifier. Display-only; pass back unchanged.
+                     */
+                    toolDisplayName?: string | null;
                     /**
                      * Internal label for the in-progress task. Pass back unchanged.
                      */
@@ -4437,9 +4934,13 @@ export type ChatsUpdateFilesResponses = {
              */
             authorId: string | null;
             /**
-             * Token usage and credit cost. All values are zero on user messages and on assistant messages that have not yet generated tokens.
+             * Model identifier, token usage, and credit cost. Token and credit values are zero on user messages and on assistant messages that have not yet generated tokens.
              */
             usage: {
+                /**
+                 * Model identifier used for the assistant message, or null when not applicable or unavailable.
+                 */
+                model: string | null;
                 /**
                  * Token counts for this message.
                  */
@@ -4857,9 +5358,13 @@ export type ChatsRestoreMessageResponses = {
             } | {
                 type: 'tool-call';
                 /**
-                 * The name of the tool that was invoked (e.g. an MCP tool name or built-in tool identifier).
+                 * The identifier the tool was invoked under. For MCP/integration tools this is a normalized identifier derived from the tool name — prefer `toolDisplayName` for display when present.
                  */
                 name: string;
+                /**
+                 * The tool's original human-readable name (an MCP/integration tool's server-side name), when `name` is a normalized identifier. Display-only.
+                 */
+                toolDisplayName?: string | null;
                 /**
                  * The arguments passed to the tool. Schema depends on the specific tool.
                  */
@@ -4888,6 +5393,10 @@ export type ChatsRestoreMessageResponses = {
                      * The tool input this permission authorizes. Pass back unchanged when resolving.
                      */
                     input?: unknown;
+                    /**
+                     * The tool's original human-readable name (an MCP/integration tool's server name), when `toolName` is a normalized identifier. Display-only; pass back unchanged.
+                     */
+                    toolDisplayName?: string | null;
                     /**
                      * Internal label for the in-progress task. Pass back unchanged.
                      */
@@ -5120,9 +5629,13 @@ export type ChatsRestoreMessageResponses = {
              */
             authorId: string | null;
             /**
-             * Token usage and credit cost. All values are zero on user messages and on assistant messages that have not yet generated tokens.
+             * Model identifier, token usage, and credit cost. Token and credit values are zero on user messages and on assistant messages that have not yet generated tokens.
              */
             usage: {
+                /**
+                 * Model identifier used for the assistant message, or null when not applicable or unavailable.
+                 */
+                model: string | null;
                 /**
                  * Token counts for this message.
                  */
@@ -5894,6 +6407,184 @@ export type SettingsSetPreviewHostsResponses = {
 };
 
 export type SettingsSetPreviewHostsResponse = SettingsSetPreviewHostsResponses[keyof SettingsSetPreviewHostsResponses];
+
+export type UsageGetSummaryData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Inclusive ISO 8601 start timestamp. Defaults to seven days ago.
+         */
+        start?: Date;
+        /**
+         * Exclusive ISO 8601 end timestamp. Defaults to the current time.
+         */
+        end?: Date;
+        /**
+         * Filter usage by user. Team owners and billing members may select any team member; other callers may select only themselves.
+         */
+        userId?: string;
+    };
+    url: '/usage/summary';
+};
+
+export type UsageGetSummaryErrors = {
+    /**
+     * Response for status 401
+     */
+    401: Error;
+    /**
+     * Response for status 403
+     */
+    403: Error;
+    /**
+     * Response for status 422
+     */
+    422: Error;
+    /**
+     * Response for status 429
+     */
+    429: Error;
+    /**
+     * Response for status 500
+     */
+    500: Error;
+};
+
+export type UsageGetSummaryError = UsageGetSummaryErrors[keyof UsageGetSummaryErrors];
+
+export type UsageGetSummaryResponses = {
+    /**
+     * Response for status 200
+     */
+    200: UsageSummary;
+};
+
+export type UsageGetSummaryResponse = UsageGetSummaryResponses[keyof UsageGetSummaryResponses];
+
+export type UsageListEventsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Inclusive ISO 8601 start timestamp. Defaults to seven days ago.
+         */
+        start?: Date;
+        /**
+         * Exclusive ISO 8601 end timestamp. Defaults to the current time.
+         */
+        end?: Date;
+        /**
+         * Filter usage by user. Team owners and billing members may select any team member; other callers may select only themselves.
+         */
+        userId?: string;
+        /**
+         * Filter usage by chat identifier.
+         */
+        chatId?: string;
+        /**
+         * Filter usage by message identifier.
+         */
+        messageId?: string;
+        /**
+         * Maximum billing records considered per credit source (1-100, default 50). Related records may be combined into one event.
+         */
+        limit?: number;
+        /**
+         * Opaque cursor returned by the previous page. It preserves the prior range and filters, so other query parameters may be omitted on subsequent pages.
+         */
+        cursor?: string;
+    };
+    url: '/usage/events';
+};
+
+export type UsageListEventsErrors = {
+    /**
+     * Response for status 401
+     */
+    401: Error;
+    /**
+     * Response for status 403
+     */
+    403: Error;
+    /**
+     * Response for status 409
+     */
+    409: Error;
+    /**
+     * Response for status 422
+     */
+    422: Error;
+    /**
+     * Response for status 500
+     */
+    500: Error;
+};
+
+export type UsageListEventsError = UsageListEventsErrors[keyof UsageListEventsErrors];
+
+export type UsageListEventsResponses = {
+    /**
+     * Response for status 200
+     */
+    200: UsageEventList;
+};
+
+export type UsageListEventsResponse = UsageListEventsResponses[keyof UsageListEventsResponses];
+
+export type UsageGetActivityData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Inclusive ISO 8601 start timestamp. Defaults to seven days ago.
+         */
+        start?: Date;
+        /**
+         * Exclusive ISO 8601 end timestamp. Defaults to the current time.
+         */
+        end?: Date;
+        /**
+         * Filter usage by user. Team owners and billing members may select any team member; other callers may select only themselves.
+         */
+        userId?: string;
+    };
+    url: '/usage/activity';
+};
+
+export type UsageGetActivityErrors = {
+    /**
+     * Response for status 401
+     */
+    401: Error;
+    /**
+     * Response for status 403
+     */
+    403: Error;
+    /**
+     * Response for status 422
+     */
+    422: Error;
+    /**
+     * Response for status 429
+     */
+    429: Error;
+    /**
+     * Response for status 500
+     */
+    500: Error;
+};
+
+export type UsageGetActivityError = UsageGetActivityErrors[keyof UsageGetActivityErrors];
+
+export type UsageGetActivityResponses = {
+    /**
+     * Response for status 200
+     */
+    200: UsageActivity;
+};
+
+export type UsageGetActivityResponse = UsageGetActivityResponses[keyof UsageGetActivityResponses];
 
 export type WebhooksListData = {
     body?: never;

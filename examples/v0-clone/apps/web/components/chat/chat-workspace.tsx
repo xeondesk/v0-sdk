@@ -32,7 +32,6 @@ export function ChatWorkspace({
   return (
     <div className="flex h-full min-h-0 flex-col">
       <ChatHeader
-        chatId={chat.id}
         onViewChange={setView}
         title={chat.title ?? 'Untitled chat'}
         view={view}
@@ -48,7 +47,7 @@ export function ChatWorkspace({
         </div>
         <div className="hidden min-w-0 flex-1 md:block">
           <div className={view === 'preview' ? 'h-full' : 'hidden'}>
-            <PreviewPane chatId={chat.id} key={contentRevision} onReadyChange={setIsPreviewReady} />
+            <PreviewPane key={contentRevision} onReadyChange={setIsPreviewReady} />
           </div>
           <div className={view === 'code' ? 'h-full' : 'hidden'}>
             <Suspense fallback={<CodeEditorLoading />}>

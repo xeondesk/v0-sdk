@@ -1,45 +1,46 @@
-import type { MessagesSendData } from 'v0'
-import { toV0JsonResponse } from '@/lib/v0-response'
 import { authorizeProxyRequest } from '@/lib/proxy'
-import { v0 } from '@/lib/v0-client'
+import { readModelId, runV0Stream } from '@/lib/v0-stream'
+import { addUserMessage, getChat, messages } from '@/lib/chat-store'
 
-type SendMessageBody = Pick<MessagesSendData['body'], 'message' | 'modelConfiguration'>
-
-export async function GET(request: Request, { params }: { params: Promise<{ chatId: string }> }) {
-  const denied = authorizeProxyRequest(request)
-  if (denied) return denied
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ chatId: string }> },
+) {
   const { chatId } = await params
-  const searchParams = new URL(request.url).searchParams
-  const limit = Number(searchParams.get('limit') ?? 20)
+  if (!getChat(chatId)) return Response.json({ message: 'Chat not found.' }, { status: 404 })
 
-  if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
-    return Response.json({ message: 'limit must be between 1 and 100.' }, { status: 400 })
-  }
+  const url = new URL(request.url)
+  const limit = parseLimit(url.searchParams.get('limit'))
+  const page = messages(chatId).slice()
+  const selected = typeof limit === 'number' ? page.slice(-limit) : page
 
-  const result = await v0.messages.list({
-    chatId,
-    limit,
-    ...(searchParams.get('cursor') ? { cursor: searchParams.get('cursor')! } : {}),
-  })
-
-  return toV0JsonResponse(result)
+  return Response.json({ messages: [...selected].reverse(), cursor: null })
 }
 
-export async function POST(request: Request, { params }: { params: Promise<{ chatId: string }> }) {
+export async function POST(
+  request: Request,
+  { params }: { params: Promise<{ chatId: string }> },
+) {
   const denied = authorizeProxyRequest(request)
   if (denied) return denied
+
   const { chatId } = await params
-  const body = (await request.json().catch(() => null)) as SendMessageBody | null
+  if (!getChat(chatId)) return Response.json({ message: 'Chat not found.' }, { status: 404 })
 
-  if (typeof body?.message !== 'string' || !body.message.trim()) {
-    return Response.json({ message: 'Enter a message.' }, { status: 400 })
+  const body = (await request.json().catch(() => ({}))) as {
+    message?: string
+    modelConfiguration?: { modelId?: string }
   }
+  const text = String(body?.message ?? '').trim()
+  if (!text) return Response.json({ message: 'A message is required.' }, { status: 400 })
 
-  const result = await v0.messages.sendStream({
-    chatId,
-    message: body.message.trim(),
-    modelConfiguration: body.modelConfiguration,
-  })
+  addUserMessage(chatId, text)
+  return runV0Stream({ chatId, modelId: readModelId(body) })
+}
 
-  return result.toResponse()
+function parseLimit(value: string | null) {
+  if (!value) return undefined
+  const parsed = Number.parseInt(value, 10)
+  if (!Number.isFinite(parsed) || parsed <= 0) return undefined
+  return Math.min(parsed, 100)
 }

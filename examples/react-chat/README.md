@@ -1,10 +1,11 @@
-# v0 + AI SDK React chat
+# OpenRouter + AI SDK React chat
 
-Minimal Next.js example app showcasing the v0 React SDK's integration with the AI SDK's `useChat`.
+Minimal Next.js example app showcasing the AI SDK's `useChat` backed by OpenRouter.
 
 ```sh
 cp .env.example .env.local
-# Add V0_API_KEY, then from the repository root:
+# Add OPENROUTER_API_KEY (optional: OPENROUTER_MODEL, defaults to openrouter/auto),
+# then from the repository root:
 bun install
 bun --filter react-chat dev
 ```

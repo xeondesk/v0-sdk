@@ -1,34 +1,44 @@
-import { revalidatePath } from 'next/cache'
-import type { ChatsUpdateData } from 'v0'
-import { toV0JsonResponse } from '@/lib/v0-response'
 import { authorizeProxyRequest } from '@/lib/proxy'
-import { v0 } from '@/lib/v0-client'
+import { deleteChat, getChat, updateChat } from '@/lib/chat-store'
 
-type UpdateChatBody = ChatsUpdateData['body']
-type RouteContext = { params: Promise<{ chatId: string }> }
-
-export async function PATCH(request: Request, { params }: RouteContext) {
-  const denied = authorizeProxyRequest(request)
-  if (denied) return denied
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ chatId: string }> },
+) {
   const { chatId } = await params
-  const body = (await request.json().catch(() => null)) as UpdateChatBody | null
-
-  if (!body || typeof body !== 'object') {
-    return Response.json({ message: 'Chat updates are required.' }, { status: 400 })
-  }
-
-  const result = await v0.chats.update({ chatId, ...body })
-
-  revalidatePath('/', 'layout')
-  return toV0JsonResponse(result)
+  const chat = getChat(chatId)
+  if (!chat) return Response.json({ message: 'Chat not found.' }, { status: 404 })
+  return Response.json(chat)
 }
 
-export async function DELETE(request: Request, { params }: RouteContext) {
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ chatId: string }> },
+) {
   const denied = authorizeProxyRequest(request)
   if (denied) return denied
-  const { chatId } = await params
-  const result = await v0.chats.delete({ chatId })
 
-  revalidatePath('/', 'layout')
-  return toV0JsonResponse(result)
+  const { chatId } = await params
+  const body = (await request.json().catch(() => ({}))) as {
+    title?: string | null
+    metadata?: Record<string, string | null>
+  }
+
+  const chat = updateChat(chatId, { title: body.title, metadata: body.metadata })
+  if (!chat) return Response.json({ message: 'Chat not found.' }, { status: 404 })
+  return Response.json(chat)
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ chatId: string }> },
+) {
+  const denied = authorizeProxyRequest(request)
+  if (denied) return denied
+
+  const { chatId } = await params
+  if (!getChat(chatId)) return Response.json({ message: 'Chat not found.' }, { status: 404 })
+
+  deleteChat(chatId)
+  return Response.json({ id: chatId })
 }

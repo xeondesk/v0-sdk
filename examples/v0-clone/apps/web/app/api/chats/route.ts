@@ -1,62 +1,65 @@
-import { revalidatePath } from 'next/cache'
-import type { ChatsCreateStreamData, ChatsListData } from 'v0'
-import { toV0JsonResponse } from '@/lib/v0-response'
 import { authorizeProxyRequest } from '@/lib/proxy'
-import { v0 } from '@/lib/v0-client'
+import { readModelId, runV0Stream, titleFromMessage } from '@/lib/v0-stream'
+import {
+  addUserMessage,
+  createChat,
+  listChats,
+  setChatTitle,
+} from '@/lib/chat-store'
 
-type CreateChatBody = Pick<ChatsCreateStreamData['body'], 'message' | 'modelConfiguration'>
+async function readBody(request: Request) {
+  try {
+    return (await request.json()) as {
+      message?: string
+      modelConfiguration?: { modelId?: string }
+    }
+  } catch {
+    return {}
+  }
+}
 
 export async function GET(request: Request) {
   const denied = authorizeProxyRequest(request)
   if (denied) return denied
-  const searchParams = new URL(request.url).searchParams
-  const limit = Number(searchParams.get('limit') ?? 20)
 
-  if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
-    return Response.json({ message: 'limit must be between 1 and 100.' }, { status: 400 })
-  }
+  const url = new URL(request.url)
+  const limit = parseLimit(url.searchParams.get('limit'))
+  const metadata = parseMetadata(url.searchParams)
 
-  const metadata = parseMetadata(searchParams)
-  const query: ChatsListData['query'] = {
-    limit,
-    ...(searchParams.get('cursor') ? { cursor: searchParams.get('cursor')! } : {}),
-    ...(searchParams.get('authorId') ? { authorId: searchParams.get('authorId')! } : {}),
-    ...(searchParams.get('vercelProjectId')
-      ? { vercelProjectId: searchParams.get('vercelProjectId')! }
-      : {}),
-    ...(Object.keys(metadata).length > 0 ? { metadata } : {}),
-  }
-  const result = await v0.chats.list(query)
-
-  return toV0JsonResponse(result)
+  return Response.json(listChats({ limit, metadata }))
 }
 
 export async function POST(request: Request) {
   const denied = authorizeProxyRequest(request)
   if (denied) return denied
-  const body = (await request.json().catch(() => null)) as CreateChatBody | null
 
-  if (typeof body?.message !== 'string' || !body.message.trim()) {
-    return Response.json({ message: 'Enter a message.' }, { status: 400 })
-  }
+  const body = await readBody(request)
+  const message = String(body?.message ?? '').trim()
+  if (!message) return Response.json({ message: 'A message is required.' }, { status: 400 })
 
-  const result = await v0.chats.createStream({
-    message: body.message.trim(),
-    modelConfiguration: body.modelConfiguration,
-    privacy: 'private',
-  })
+  const chat = createChat()
+  const title = titleFromMessage(message)
+  setChatTitle(chat.id, title)
+  addUserMessage(chat.id, message)
 
-  revalidatePath('/', 'layout')
-  return result.toResponse()
+  return runV0Stream({ chatId: chat.id, modelId: readModelId(body), title })
 }
 
+function parseLimit(value: string | null) {
+  if (!value) return undefined
+  const parsed = Number.parseInt(value, 10)
+  if (!Number.isFinite(parsed) || parsed <= 0) return undefined
+  return Math.min(parsed, 100)
+}
+
+// The v0 API filters with `metadata[key]=value` query params (deepObject style).
 function parseMetadata(searchParams: URLSearchParams) {
   const metadata: Record<string, string> = {}
 
   for (const [key, value] of searchParams) {
-    const match = /^metadata\[([^\]]+)\]$/.exec(key)
-    if (match?.[1]) metadata[match[1]] = value
+    const match = /^metadata\[(.+)\]$/.exec(key)
+    if (match && value) metadata[match[1]] = value
   }
 
-  return metadata
+  return Object.keys(metadata).length > 0 ? metadata : undefined
 }
