@@ -1,6 +1,6 @@
 import 'server-only'
 
-import { streamText } from 'ai'
+import { streamText, type FinishReason, type LanguageModelUsage } from 'ai'
 import { nanoid } from 'nanoid'
 import type { Chat, Message } from 'v0'
 
@@ -49,7 +49,7 @@ export function runV0Stream({
     async start(queue) {
       let text = ''
       let finishedAt: Date | undefined
-      let finishReason: 'stop' | 'length' | 'error' = 'stop'
+      let finishReason: Extract<Message['finishReason'], string> = 'stop'
       let part: Message['parts'][number] | undefined
 
       const message = (): Message => ({
@@ -125,28 +125,38 @@ export function runV0Stream({
           abortSignal: controller.signal,
         })
 
-        for await (const delta of result.textStream) {
-          text += delta
-          emitText()
+        let streamFailure: unknown = null
+        let streamFinishReason: FinishReason | undefined
+        let streamUsage: LanguageModelUsage | undefined
+
+        for await (const streamPart of result.stream) {
+          if (streamPart.type === 'text-delta') {
+            text += streamPart.text
+            emitText()
+          } else if (streamPart.type === 'error') {
+            streamFailure = streamPart.error
+          } else if (streamPart.type === 'abort') {
+            streamFailure = streamPart.reason ?? 'The response was stopped.'
+          } else if (streamPart.type === 'finish') {
+            streamFinishReason = streamPart.finishReason
+            streamUsage = streamPart.totalUsage
+          }
         }
 
-        const modelFinishReason = await Promise.resolve(result.finishReason).catch(() => null)
-        const usage = await Promise.resolve(result.usage).catch(() => undefined)
-        if (modelFinishReason === 'length' || modelFinishReason === 'error') {
-          finishReason = modelFinishReason
-        }
+        if (streamFailure) throw streamFailure
 
+        finishReason = streamFinishReason ?? 'stop'
         finishedAt = new Date()
         const finalMessage = message()
-        if (usage) {
+        if (streamUsage) {
           finalMessage.usage = {
             model: resolvedModelId,
             tokens: {
-              input: usage.inputTokens ?? 0,
-              output: usage.outputTokens ?? 0,
+              input: streamUsage.inputTokens ?? 0,
+              output: streamUsage.outputTokens ?? 0,
               cacheRead: 0,
               cacheWrite: 0,
-              total: usage.totalTokens ?? 0,
+              total: streamUsage.totalTokens ?? 0,
             },
             creditsCost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 },
           }
